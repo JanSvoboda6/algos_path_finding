@@ -1,0 +1,50 @@
+.square {
+    font-size: 0;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    background: rgba(255, 179, 179, 0.7);
+    border: 2px solid rgba(255, 179, 179, 0.9);
+}
+
+.square:hover {
+    transition: 0.28s;
+    background: rgba(246, 117, 117, 0.7);
+}
+
+.square:focus {
+    outline: none;
+}
+
+.start{
+    font-size: 0;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    background: rgba(199, 55, 55, 0.7);
+    border: 2px solid rgba(255, 179, 179, 0.9);
+}
+
+.start:hover {
+    transition: 0.28s;
+    background: rgba(153, 32, 32, 0.7);
+}
+
+.start:focus {
+    outline: none;
+}
+
+.finish{
+    font-size: 0;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    background: rgba(117, 149, 206, 0.7);
+    border: 2px solid rgba(255, 179, 179, 0.9);
+}

@@ -1,0 +1,9 @@
+
+.table {
+    border: 0;
+    width: 1000px;
+    height: 1000px;
+    background-color: rgba(203, 193, 193, 0.2);
+    align-items: center;
+    display: flex;
+}
