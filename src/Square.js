@@ -20,11 +20,7 @@ class Square extends React.Component {
       ? "barrier"
       : "";
 
-    // if (btnClass === "start"){
-    //     console.log("START");
-    // }
-
-    return <button className={`square ${btnClass}`} onClick={this.handleClick}></button>;
+    return <button className={`square ${btnClass}`} onClick={() => this.props.handleClick(this.props.id)}></button>;
   }
 }
 

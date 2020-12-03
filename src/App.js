@@ -2,7 +2,17 @@ import React from "react";
 import "./App.css";
 import Table from "./Table";
 
-function App() {
+class App extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = {selectedSquareType: "start"};
+  }
+
+  handleSquareTypeChoice = (event) => {
+    this.setState({selectedSquareType: event.target.value})
+  }
+
+  render() {
   return (
     <div className="App">
       <div className="navbar">
@@ -17,19 +27,20 @@ function App() {
         </div>
         <div className="select-box">
           <label>Choose type: </label>
-          <select className="select">
+          <select className="select" onChange={this.handleSquareTypeChoice}>
             <option value="start">Start</option>
-            <option value="end">End</option>
-            <option value="border">Border</option>
+            <option value="finish">Finish</option>
+            <option value="barrier">Barrier</option>
           </select>
         </div>
       </div>
 
       <div className="tablePosition">
-        <Table />
+        <Table selectedSquareType={this.state.selectedSquareType}/>
       </div>
     </div>
   );
+}
 }
 
 export default App;
