@@ -5,13 +5,13 @@
     padding: 0;
     margin: 0;
     text-align: center;
-    background: rgba(255, 179, 179, 0.7);
+    background: rgba(255, 179, 179, 0.425);
     border: 2px solid rgba(255, 179, 179, 0.9);
 }
 
 .square:hover {
-    transition: 0.28s;
-    background: rgba(246, 117, 117, 0.7);
+    transition: 0.6s;
+    background: rgba(246, 117, 117, 0.404);
 }
 
 .square:focus {
@@ -25,13 +25,28 @@
     padding: 0;
     margin: 0;
     text-align: center;
-    background: rgba(199, 55, 55, 0.7);
+    background: rgba(243, 69, 26, 0.911);
     border: 2px solid rgba(255, 179, 179, 0.9);
+    background-image: url(play-button.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 70% 70%;
 }
 
 .start:hover {
-    transition: 0.28s;
-    background: rgba(153, 32, 32, 0.7);
+    transition: 0.8s;
+    font-size: 0;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    background: rgba(238, 81, 42, 0.911);
+    border: 2px solid rgba(255, 179, 179, 0.9);
+    background-image: url(play-button.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 70% 70%;
 }
 
 .start:focus {
@@ -45,8 +60,28 @@
     padding: 0;
     margin: 0;
     text-align: center;
-    background: rgba(117, 149, 206, 0.7);
+    background: rgba(57, 118, 224, 0.7);
     border: 2px solid rgba(255, 179, 179, 0.9);
+    background-image: url(finish.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 80% 80%;
+}
+
+.finish:hover{
+    transition: 0.6s;
+    font-size: 0;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    background: rgba(65, 121, 218, 0.7);
+    border: 2px solid rgba(255, 179, 179, 0.9);
+    background-image: url(finish.png);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 80% 80%;
 }
 
 .barrier{
@@ -57,5 +92,28 @@
     margin: 0;
     text-align: center;
     background: rgba(16, 7, 24, 0.7);
+    border: 2px solid rgba(255, 179, 179, 0.9);
+}
+
+.visited{
+    font-size: 0;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    transition: 0.6s;
+    text-align: center;
+    background: rgba(240, 223, 72, 0.37);
+    border: 2px solid rgba(255, 179, 179, 0.9);
+}
+
+.shortestPath{
+    font-size: 0;
+    width: 50px;
+    height: 50px;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    background: rgba(23, 132, 140, 0.527);
     border: 2px solid rgba(255, 179, 179, 0.9);
 }

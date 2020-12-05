@@ -22,9 +22,6 @@ class App extends React.Component{
         </ul>
       </div>
       <div className="solve-section">
-        <div>
-          <button className="solve-button">Find shortest path </button>
-        </div>
         <div className="select-box">
           <label>Choose type: </label>
           <select className="select" onChange={this.handleSquareTypeChoice}>
