@@ -7,13 +7,12 @@ class Square extends React.Component {
     this.state = {};
   }
 
-  
-  handleMouseDown = () => {
-    console.log("working");
-  }
+  // handleMouseDown = () => {
+  //   console.log("working");
+  // }
 
   render() {
-    const { isStart, isFinish, isBarrier, hasBeenVisited, isOnShortestPath } = this.props;
+    const { isStart, isFinish, isBarrier, isInSearchArea, isOnShortestPath } = this.props;
 
     let btnClass = isStart
       ? "start"
@@ -23,11 +22,12 @@ class Square extends React.Component {
       ? "barrier"
       : "";
 
-    let hasBeenVisitedClass = "";
+    let searchAreaClass = "";
     //TODO: Refactor
     if (btnClass === "") {
-      hasBeenVisitedClass = hasBeenVisited ? "visited" : "";
+      searchAreaClass = isInSearchArea ? "search-area" : "";
     }
+
     let isOnShortestPathClass = ""; 
     if(isOnShortestPath){
       isOnShortestPathClass = "shortestPath";
@@ -35,9 +35,9 @@ class Square extends React.Component {
 
     return (
       <button
-        className={`square ${btnClass} ${hasBeenVisitedClass} ${isOnShortestPathClass}`}
-        onClick={() => this.props.handleClick(this.props.id)}
-        onMouseDown={ () => this.handleMouseDown()}
+        className={`square ${btnClass} ${searchAreaClass} ${isOnShortestPathClass}`}
+        onClick={() => this.props.handleClickOnSquare(this.props.id)}
+        //onMouseDown={ () => this.handleMouseDown()}
       ></button>
     );
   }
