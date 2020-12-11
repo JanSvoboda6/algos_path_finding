@@ -14,6 +14,7 @@ class PathFinder extends React.Component {
       wasSolved: false,
       visitedSquares: [],
       shortestPath: [],
+      algorithmType: "dijkstra",
     };
   }
 
@@ -47,7 +48,11 @@ class PathFinder extends React.Component {
     const FINISH_ROW = 8;
     const FINISH_COL = 13;
 
-    const BARRIERS_POSITION = [[7,9], [8,9], [9,9]];
+    const BARRIERS_POSITION = [
+      [7, 9],
+      [8, 9],
+      [9, 9],
+    ];
 
     const squares = this.state.squares;
 
@@ -72,17 +77,16 @@ class PathFinder extends React.Component {
       isBarrier: false,
     };
 
-    for(let i = 0; i < BARRIERS_POSITION.length; i ++)
-    {
+    for (let i = 0; i < BARRIERS_POSITION.length; i++) {
       let row = BARRIERS_POSITION[i][0];
       let col = BARRIERS_POSITION[i][1];
       squares[row][col] = {
-        id: { row: BARRIERS_POSITION[i][0], col: BARRIERS_POSITION[i][1]},
+        id: { row: BARRIERS_POSITION[i][0], col: BARRIERS_POSITION[i][1] },
         isStart: false,
         isFinish: false,
         isBarrier: true,
       };
-    };
+    }
 
     this.setState({ squares });
   }
@@ -134,6 +138,66 @@ class PathFinder extends React.Component {
     return visitedSquares;
   };
 
+  solveWithHeuristics = (squares) => {
+    const POWER_OF_HEURISTICS = 4;
+    let visitedSquares = [];
+    this.setInfiniteDistanceFromStart(squares);
+    let start = this.getStartingSquare(squares);
+    let priorityQueue = [];
+    priorityQueue.push(start);
+    let isFinished = false;
+    while (priorityQueue.length && !isFinished) {
+      priorityQueue.sort((a, b) => {
+        if (a.distance <= b.distance) {
+          return -1;
+        }
+        return 1;
+      });
+      let currentSquare = priorityQueue[0];
+      //TODO: Remove exists?
+      priorityQueue.shift();
+      let neighbours = this.getNeighboursOf(currentSquare, squares);
+      for (let i = 0; i < neighbours.length; i++) {
+        let neighbour = neighbours[i];
+        let computedDistanceOfNeighbour = currentSquare.distance + 1;
+        let heuristics = this.getDistanceHeuristics(
+          neighbour,
+          squares,
+          POWER_OF_HEURISTICS
+        );
+        if (computedDistanceOfNeighbour + heuristics < neighbour.distance) {
+          neighbour.distance = computedDistanceOfNeighbour + heuristics;
+          neighbour.previousSquare = currentSquare;
+        }
+
+        if (neighbour.isFinish) {
+          isFinished = true;
+          break;
+        }
+
+        if (!neighbour.hasBeenVisited) {
+          priorityQueue.push(neighbour);
+          neighbour.hasBeenVisited = true;
+          visitedSquares.push(neighbour);
+        }
+        squares[neighbour.id.row][neighbour.id.col] = neighbour;
+      }
+    }
+    return visitedSquares;
+  };
+
+  getDistanceHeuristics = (square, squares, power) => {
+    let finishSquare = this.getFinishSquare(squares);
+    const squareRow = square.id.row;
+    const squareCol = square.id.col;
+    const finishRow = finishSquare.id.row;
+    const finishCol = finishSquare.id.col;
+    return Math.pow(
+      Math.abs(finishRow - squareRow) + Math.abs(finishCol - squareCol),
+      power
+    );
+  };
+
   getNeighboursOf = (square, squares) => {
     let squarePosition = square.id;
     let neighbours = [];
@@ -172,7 +236,7 @@ class PathFinder extends React.Component {
         if (squares[i][j].isStart) {
           squares[i][j]["distance"] = 0;
         } else {
-          squares[i][j]["distance"] = 999;
+          squares[i][j]["distance"] = Number.MAX_VALUE;
         }
         squares[i][j]["previousSquare"] = null;
         squares[i][j]["hasBeenVisited"] = false;
@@ -209,7 +273,7 @@ class PathFinder extends React.Component {
   constructShortestPath = (startingSquare, finishSquare) => {
     let shortestPath = [];
     let tempSquare = finishSquare;
-    if(!finishSquare.previousSquare){
+    if (!finishSquare.previousSquare) {
       return;
     }
     while (tempSquare !== startingSquare) {
@@ -224,26 +288,30 @@ class PathFinder extends React.Component {
     let squares = this.state.squares;
     const startingSquare = this.getStartingSquare(squares);
     const finishSquare = this.getFinishSquare(squares);
-    const visitedSquares = this.solve(squares);
+    let visitedSquares = [];
+
+    if (this.state.algorithmType === "dijkstra") {
+      visitedSquares = this.solve(squares);
+    } else if (this.state.algorithmType == "a_star") {
+      visitedSquares = this.solveWithHeuristics(squares);
+    } else {
+      alert("NO algorithm has been chosen!");
+      return;
+    }
     this.animateSolving(squares, visitedSquares).then(() => {
       const shortestPath = this.constructShortestPath(
         startingSquare,
         finishSquare
       );
 
-      if(shortestPath){
+      if (shortestPath) {
         this.animateShortestPath(squares, shortestPath);
       }
     });
-
-  };
-
-  handleSquareTypeChoice = (event) => {
-    this.setState({ selectedSquareType: event.target.value });
   };
 
   animateSolving = async (squares, visitedSquares) => {
-    const DELAY_BETWEEN_SQUARE_ANIMATION = 3;
+    const DELAY_BETWEEN_SQUARE_ANIMATION = 10;
     return new Promise((resolve) => {
       for (let i = 0; i < visitedSquares.length; i++) {
         let currentSquare = visitedSquares[i];
@@ -262,7 +330,7 @@ class PathFinder extends React.Component {
   };
 
   animateShortestPath = (squares, shortestPath) => {
-    const DELAY_BETWEEN_SQUARE_ON_PATH_ANIMATION = 100;
+    const DELAY_BETWEEN_SQUARE_ON_PATH_ANIMATION = 50;
     for (let i = 0; i < shortestPath.length - 1; i++) {
       setTimeout(() => {
         let currentSquare = shortestPath[i];
@@ -285,7 +353,7 @@ class PathFinder extends React.Component {
       }
     }
     this.setState({ squares: squares });
-  }
+  };
 
   handleClickOnSquare = (idOfClickedSquare) => {
     let squares = this.state.squares;
@@ -309,18 +377,30 @@ class PathFinder extends React.Component {
       }
 
       squares[idOfClickedSquare.row][idOfClickedSquare.col] = {
-        ... squares[idOfClickedSquare.row][idOfClickedSquare.col],
+        ...squares[idOfClickedSquare.row][idOfClickedSquare.col],
         id: { row: idOfClickedSquare.row, col: idOfClickedSquare.col },
         isStart: this.state.selectedSquareType === "start" ? true : false,
         isFinish: this.state.selectedSquareType === "finish" ? true : false,
       };
     }
 
-    if (this.state.selectedSquareType === "barrier"){
-      squares[idOfClickedSquare.row][idOfClickedSquare.col].isBarrier = !squares[idOfClickedSquare.row][idOfClickedSquare.col].isBarrier
+    if (this.state.selectedSquareType === "barrier") {
+      squares[idOfClickedSquare.row][
+        idOfClickedSquare.col
+      ].isBarrier = !squares[idOfClickedSquare.row][idOfClickedSquare.col]
+        .isBarrier;
     }
 
     this.setState({ squares: squares });
+    this.eraseSearchAreaWithShortestPath();
+  };
+
+  handleSquareTypeChoice = (event) => {
+    this.setState({ selectedSquareType: event.target.value });
+  };
+
+  handleAlgorithmChange = (event) => {
+    this.setState({ algorithmType: event.target.value });
     this.eraseSearchAreaWithShortestPath();
   };
 
@@ -342,18 +422,25 @@ class PathFinder extends React.Component {
         </div>
         <div className="solve-section">
           <div className="select-box">
-            <label>Choose square: </label>
+            <label>Square: </label>
             <select className="select" onChange={this.handleSquareTypeChoice}>
               <option value="start">Start</option>
               <option value="finish">Finish</option>
               <option value="barrier">Barrier</option>
             </select>
           </div>
+          <div className="select-box">
+            <label>Algorithm: </label>
+            <select className="select" onChange={this.handleAlgorithmChange}>
+              <option value="dijkstra">Dijkstra</option>
+              <option value="a_star">A*</option>
+            </select>
+          </div>
           <div>
-          <button className="solve-button" onClick={this.handleSolveClick}>
-            Find shortest path
-          </button>
-        </div>
+            <button className="solve-button" onClick={this.handleSolveClick}>
+              Find shortest path
+            </button>
+          </div>
         </div>
         <div className="tablePosition">
           <Table
