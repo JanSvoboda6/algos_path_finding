@@ -8,35 +8,6 @@ class Table extends React.Component {
     this.state = { squares: [] };
   }
 
-
-
-  getStartingSquare = (squares) => {
-    //TODO: Refactor
-    let startingSquare = {};
-    squares.filter((squaresInRow) => {
-      let squareRow = squaresInRow.filter((square) => {
-        if (square.isStart === true) {
-          startingSquare = square;
-        }
-      });
-    });
-    return startingSquare;
-  };
-
-  getFinishSquare = (squares) => {
-    //TODO: Refactor
-    let finishSquare = {};
-    squares.filter((squaresInRow) => {
-      let squareRow = squaresInRow.filter((square) => {
-        if (square.isFinish === true) {
-          finishSquare = square;
-        }
-      });
-    });
-    return finishSquare;
-  };
-
-
   render() {
     const { squares } = this.props;
     return (

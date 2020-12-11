@@ -2,8 +2,8 @@ import React from "react";
 import "./PathFinder.css";
 import Table from "./Table";
 
-const COLS = 20;
-const ROWS = 20;
+const COLS = 19;
+const ROWS = 19;
 
 class PathFinder extends React.Component {
   constructor(props) {
@@ -41,11 +41,13 @@ class PathFinder extends React.Component {
   }
 
   chooseSquares() {
-    const START_ROW = 5;
-    const START_COL = 1;
+    const START_ROW = 8;
+    const START_COL = 5;
 
-    const FINISH_ROW = 5;
-    const FINISH_COL = 8;
+    const FINISH_ROW = 8;
+    const FINISH_COL = 13;
+
+    const BARRIERS_POSITION = [[7,9], [8,9], [9,9]];
 
     const squares = this.state.squares;
 
@@ -61,6 +63,25 @@ class PathFinder extends React.Component {
       isStart: false,
       isFinish: true,
       isBarrier: false,
+    };
+
+    squares[FINISH_ROW][FINISH_COL] = {
+      id: { row: FINISH_ROW, col: FINISH_COL },
+      isStart: false,
+      isFinish: true,
+      isBarrier: false,
+    };
+
+    for(let i = 0; i < BARRIERS_POSITION.length; i ++)
+    {
+      let row = BARRIERS_POSITION[i][0];
+      let col = BARRIERS_POSITION[i][1];
+      squares[row][col] = {
+        id: { row: BARRIERS_POSITION[i][0], col: BARRIERS_POSITION[i][1]},
+        isStart: false,
+        isFinish: false,
+        isBarrier: true,
+      };
     };
 
     this.setState({ squares });
@@ -217,7 +238,6 @@ class PathFinder extends React.Component {
 
   };
 
-
   handleSquareTypeChoice = (event) => {
     this.setState({ selectedSquareType: event.target.value });
   };
@@ -242,7 +262,7 @@ class PathFinder extends React.Component {
   };
 
   animateShortestPath = (squares, shortestPath) => {
-    const DELAY_BETWEEN_SQUARE_ANIMATION = 100;
+    const DELAY_BETWEEN_SQUARE_ON_PATH_ANIMATION = 100;
     for (let i = 0; i < shortestPath.length - 1; i++) {
       setTimeout(() => {
         let currentSquare = shortestPath[i];
@@ -251,11 +271,11 @@ class PathFinder extends React.Component {
           currentSquare.id.col
         ].isOnShortestPath = true;
         this.setState({ squares });
-      }, DELAY_BETWEEN_SQUARE_ANIMATION * (i + 1));
+      }, DELAY_BETWEEN_SQUARE_ON_PATH_ANIMATION * (i + 1));
     }
   };
 
-  handleResetClick = () => {
+  eraseSearchAreaWithShortestPath = () => {
     let squares = this.state.squares;
     for (let i = 0; i < ROWS; i++) {
       for (let j = 0; j < COLS; j++) {
@@ -265,7 +285,7 @@ class PathFinder extends React.Component {
       }
     }
     this.setState({ squares: squares });
-  };
+  }
 
   handleClickOnSquare = (idOfClickedSquare) => {
     let squares = this.state.squares;
@@ -289,13 +309,19 @@ class PathFinder extends React.Component {
       }
 
       squares[idOfClickedSquare.row][idOfClickedSquare.col] = {
+        ... squares[idOfClickedSquare.row][idOfClickedSquare.col],
         id: { row: idOfClickedSquare.row, col: idOfClickedSquare.col },
         isStart: this.state.selectedSquareType === "start" ? true : false,
         isFinish: this.state.selectedSquareType === "finish" ? true : false,
-        isBarrier: this.state.selectedSquareType === "barrier" ? true : false,
       };
     }
+
+    if (this.state.selectedSquareType === "barrier"){
+      squares[idOfClickedSquare.row][idOfClickedSquare.col].isBarrier = !squares[idOfClickedSquare.row][idOfClickedSquare.col].isBarrier
+    }
+
     this.setState({ squares: squares });
+    this.eraseSearchAreaWithShortestPath();
   };
 
   render() {
@@ -316,21 +342,18 @@ class PathFinder extends React.Component {
         </div>
         <div className="solve-section">
           <div className="select-box">
-            <label>Choose type: </label>
+            <label>Choose square: </label>
             <select className="select" onChange={this.handleSquareTypeChoice}>
               <option value="start">Start</option>
               <option value="finish">Finish</option>
               <option value="barrier">Barrier</option>
             </select>
           </div>
-        </div>
-        <div>
+          <div>
           <button className="solve-button" onClick={this.handleSolveClick}>
             Find shortest path
           </button>
         </div>
-        <div>
-          <button onClick={this.handleResetClick}>Reset</button>
         </div>
         <div className="tablePosition">
           <Table
