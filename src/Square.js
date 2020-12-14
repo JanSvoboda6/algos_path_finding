@@ -4,40 +4,43 @@ import "./Square.css";
 class Square extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
   }
 
-  // handleMouseDown = () => {
-  //   console.log("working");
-  // }
+  getMainStylingClass(isStart, isFinish, isBarrier) {
+    return isStart ? "start" : isFinish ? "finish" : isBarrier ? "barrier" : "";
+  }
+
+  getSearchAreaStylingClass(isInSearchArea, hasMainStylingClass) {
+    if (isInSearchArea && !hasMainStylingClass) {
+      return "search-area";
+    } else {
+      return "";
+    }
+  }
+
+  getOnShortestPathStylingClass(isOnShortestPath, hasMainStylingClass) {
+    if (isOnShortestPath && !hasMainStylingClass) {
+      return "shortest-path";
+    } else {
+      return "";
+    }
+  }
 
   render() {
     const { isStart, isFinish, isBarrier, isInSearchArea, isOnShortestPath } = this.props;
 
-    let btnClass = isStart
-      ? "start"
-      : isFinish
-      ? "finish"
-      : isBarrier
-      ? "barrier"
-      : "";
+    const mainStylingClass = this.getMainStylingClass(isStart, isFinish, isBarrier);
 
-    let searchAreaClass = "";
-    //TODO: Refactor
-    if (btnClass === "") {
-      searchAreaClass = isInSearchArea ? "search-area" : "";
-    }
+    const hasMainStylingClass = mainStylingClass ? true : false;
 
-    let isOnShortestPathClass = ""; 
-    if(isOnShortestPath){
-      isOnShortestPathClass = "shortestPath";
-    }
+    const searchAreaClass = this.getSearchAreaStylingClass(isInSearchArea, hasMainStylingClass);
+
+    const isOnShortestPathClass = this.getOnShortestPathStylingClass(isOnShortestPath, hasMainStylingClass);
 
     return (
       <button
-        className={`square ${btnClass} ${searchAreaClass} ${isOnShortestPathClass}`}
+        className={`square ${mainStylingClass} ${searchAreaClass} ${isOnShortestPathClass}`}
         onClick={() => this.props.handleClickOnSquare(this.props.id)}
-        //onMouseDown={ () => this.handleMouseDown()}
       ></button>
     );
   }
