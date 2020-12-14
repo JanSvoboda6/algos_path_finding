@@ -1,9 +1,9 @@
 import React from "react";
 import "./PathFinder.css";
 import Table from "./Table";
-import { dijkstra } from "./Dijkstra";
-import { aStar } from "./AStar";
-import { constructShortestPath } from "./Util";
+import { dijkstra } from "./algos/Dijkstra";
+import { aStar } from "./algos/AStar";
+import { constructShortestPath } from "./algos/AlgosUtil";
 
 const COLS = 19;
 const ROWS = 19;
@@ -123,9 +123,9 @@ class PathFinder extends React.Component {
   handleSolveClick = () => {
     this.eraseSearchAreaWithShortestPath();
     let squares = this.state.squares;
+    let visitedSquares = [];
     const startingSquare = this.getStartingSquare(squares);
     const finishSquare = this.getFinishSquare(squares);
-    let visitedSquares = [];
 
     if (this.state.algorithmType === "dijkstra") {
       visitedSquares = dijkstra(squares, startingSquare, finishSquare);
@@ -138,7 +138,6 @@ class PathFinder extends React.Component {
 
     this.animateSolving(squares, visitedSquares).then(() => {
       const shortestPath = constructShortestPath(startingSquare, finishSquare);
-
       if (shortestPath) {
         this.animateShortestPath(squares, shortestPath);
       }

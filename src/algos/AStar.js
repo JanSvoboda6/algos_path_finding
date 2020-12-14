@@ -1,4 +1,4 @@
-import{setInfiniteDistanceFromStart, getNeighboursOf} from "./Util";
+import{setInfiniteDistanceFromStart, getNeighboursOf} from "./AlgosUtil";
 
 export function aStar(squares, startingSquare, finishSquare) {
   const POWER_OF_HEURISTICS = 4;

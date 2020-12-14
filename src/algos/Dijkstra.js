@@ -1,4 +1,4 @@
-import{setInfiniteDistanceFromStart, getNeighboursOf} from "./Util";
+import { setInfiniteDistanceFromStart, getNeighboursOf } from "./AlgosUtil";
 
 export function dijkstra(squares, startingSquare, finishSquare) {
   let visitedSquares = [];
