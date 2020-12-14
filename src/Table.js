@@ -17,7 +17,7 @@ class Table extends React.Component {
                 return (
                   <Square
                     key={squareIndex}
-                    id={square.id}
+                    position={square.position}
                     isStart={square.isStart}
                     isFinish={square.isFinish}
                     isBarrier={square.isBarrier}

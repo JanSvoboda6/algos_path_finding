@@ -40,7 +40,7 @@ class Square extends React.Component {
     return (
       <button
         className={`square ${mainStylingClass} ${searchAreaClass} ${shortestPathClass}`}
-        onClick={() => this.props.handleClickOnSquare(this.props.id)}
+        onClick={() => this.props.handleClickOnSquare(this.props.position)}
         data-testid="square"
       ></button>
     );

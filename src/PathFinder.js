@@ -28,7 +28,7 @@ class PathFinder extends React.Component {
       let squaresInRow = [];
       for (let j = 0; j < ROWS; j++) {
         const square = {
-          id: { row: i, col: j },
+          position: { row: i, col: j },
           isStart: false,
           isFinish: false,
           isBarrier: false,
@@ -57,21 +57,21 @@ class PathFinder extends React.Component {
     const squares = this.state.squares;
 
     squares[START_ROW][START_COL] = {
-      id: { row: START_ROW, col: START_COL },
+      position: { row: START_ROW, col: START_COL },
       isStart: true,
       isFinish: false,
       isBarrier: false,
     };
 
     squares[FINISH_ROW][FINISH_COL] = {
-      id: { row: FINISH_ROW, col: FINISH_COL },
+      position: { row: FINISH_ROW, col: FINISH_COL },
       isStart: false,
       isFinish: true,
       isBarrier: false,
     };
 
     squares[FINISH_ROW][FINISH_COL] = {
-      id: { row: FINISH_ROW, col: FINISH_COL },
+      position: { row: FINISH_ROW, col: FINISH_COL },
       isStart: false,
       isFinish: true,
       isBarrier: false,
@@ -81,7 +81,7 @@ class PathFinder extends React.Component {
       let row = BARRIERS_POSITION[i][0];
       let col = BARRIERS_POSITION[i][1];
       squares[row][col] = {
-        id: { row: BARRIERS_POSITION[i][0], col: BARRIERS_POSITION[i][1] },
+        position: { row: BARRIERS_POSITION[i][0], col: BARRIERS_POSITION[i][1] },
         isStart: false,
         isFinish: false,
         isBarrier: true,
@@ -128,7 +128,7 @@ class PathFinder extends React.Component {
           neighbour.hasBeenVisited = true;
           visitedSquares.push(neighbour);
         }
-        squares[neighbour.id.row][neighbour.id.col] = neighbour;
+        squares[neighbour.position.row][neighbour.position.col] = neighbour;
       }
     }
     //this.animateSolving(squaresForAnimation);
@@ -180,7 +180,7 @@ class PathFinder extends React.Component {
           neighbour.hasBeenVisited = true;
           visitedSquares.push(neighbour);
         }
-        squares[neighbour.id.row][neighbour.id.col] = neighbour;
+        squares[neighbour.position.row][neighbour.position.col] = neighbour;
       }
     }
     return visitedSquares;
@@ -188,10 +188,10 @@ class PathFinder extends React.Component {
 
   getDistanceHeuristics = (square, squares, power) => {
     let finishSquare = this.getFinishSquare(squares);
-    const squareRow = square.id.row;
-    const squareCol = square.id.col;
-    const finishRow = finishSquare.id.row;
-    const finishCol = finishSquare.id.col;
+    const squareRow = square.position.row;
+    const squareCol = square.position.col;
+    const finishRow = finishSquare.position.row;
+    const finishCol = finishSquare.position.col;
     return Math.pow(
       Math.abs(finishRow - squareRow) + Math.abs(finishCol - squareCol),
       power
@@ -199,7 +199,7 @@ class PathFinder extends React.Component {
   };
 
   getNeighboursOf = (square, squares) => {
-    let squarePosition = square.id;
+    let squarePosition = square.position;
     let neighbours = [];
 
     //TODO: Refactor
@@ -209,15 +209,15 @@ class PathFinder extends React.Component {
       }
     }
 
-    if (squarePosition.col + 1 !== COLS) {
-      if (!squares[squarePosition.row][squarePosition.col + 1].isBarrier) {
-        neighbours.push(squares[squarePosition.row][squarePosition.col + 1]);
-      }
-    }
-
     if (squarePosition.row - 1 >= 0) {
       if (!squares[squarePosition.row - 1][squarePosition.col].isBarrier) {
         neighbours.push(squares[squarePosition.row - 1][squarePosition.col]);
+      }
+    }
+
+    if (squarePosition.col + 1 !== COLS) {
+      if (!squares[squarePosition.row][squarePosition.col + 1].isBarrier) {
+        neighbours.push(squares[squarePosition.row][squarePosition.col + 1]);
       }
     }
 
@@ -285,6 +285,7 @@ class PathFinder extends React.Component {
   };
 
   handleSolveClick = () => {
+    this.eraseSearchAreaWithShortestPath();
     let squares = this.state.squares;
     const startingSquare = this.getStartingSquare(squares);
     const finishSquare = this.getFinishSquare(squares);
@@ -316,8 +317,8 @@ class PathFinder extends React.Component {
       for (let i = 0; i < visitedSquares.length; i++) {
         let currentSquare = visitedSquares[i];
         setTimeout(() => {
-          squares[currentSquare.id.row][
-            currentSquare.id.col
+          squares[currentSquare.position.row][
+            currentSquare.position.col
           ].isInSearchArea = true;
           this.setState({ squares: squares });
         }, DELAY_BETWEEN_SQUARE_ANIMATION * (i + 1));
@@ -335,8 +336,8 @@ class PathFinder extends React.Component {
       setTimeout(() => {
         let currentSquare = shortestPath[i];
         //TODO: Timeout not working properly? Maybe problem with this.state.squares?
-        squares[currentSquare.id.row][
-          currentSquare.id.col
+        squares[currentSquare.position.row][
+          currentSquare.position.col
         ].isOnShortestPath = true;
         this.setState({ squares });
       }, DELAY_BETWEEN_SQUARE_ON_PATH_ANIMATION * (i + 1));
@@ -355,39 +356,39 @@ class PathFinder extends React.Component {
     this.setState({ squares: squares });
   };
 
-  handleClickOnSquare = (idOfClickedSquare) => {
+  handleClickOnSquare = (positionOfClickedSquare) => {
     let squares = this.state.squares;
     //TODO: ADD start node and finish node from start
     const oldStartingSquare = this.getStartingSquare(squares);
     const oldFinishSquare = this.getFinishSquare(squares);
     //TODO: Proper refactoring needed
     if (
-      idOfClickedSquare !== oldStartingSquare.id &&
-      idOfClickedSquare !== oldFinishSquare.id
+      positionOfClickedSquare !== oldStartingSquare.position &&
+      positionOfClickedSquare !== oldFinishSquare.position
     ) {
       if (this.state.selectedSquareType === "start") {
-        squares[oldStartingSquare.id.row][
-          oldStartingSquare.id.col
+        squares[oldStartingSquare.position.row][
+          oldStartingSquare.position.col
         ].isStart = false;
       }
       if (this.state.selectedSquareType === "finish") {
-        squares[oldFinishSquare.id.row][
-          oldFinishSquare.id.col
+        squares[oldFinishSquare.position.row][
+          oldFinishSquare.position.col
         ].isFinish = false;
       }
 
-      squares[idOfClickedSquare.row][idOfClickedSquare.col] = {
-        ...squares[idOfClickedSquare.row][idOfClickedSquare.col],
-        id: { row: idOfClickedSquare.row, col: idOfClickedSquare.col },
+      squares[positionOfClickedSquare.row][positionOfClickedSquare.col] = {
+        ...squares[positionOfClickedSquare.row][positionOfClickedSquare.col],
+        position: { row: positionOfClickedSquare.row, col: positionOfClickedSquare.col },
         isStart: this.state.selectedSquareType === "start" ? true : false,
         isFinish: this.state.selectedSquareType === "finish" ? true : false,
       };
     }
 
     if (this.state.selectedSquareType === "barrier") {
-      squares[idOfClickedSquare.row][
-        idOfClickedSquare.col
-      ].isBarrier = !squares[idOfClickedSquare.row][idOfClickedSquare.col]
+      squares[positionOfClickedSquare.row][
+        positionOfClickedSquare.col
+      ].isBarrier = !squares[positionOfClickedSquare.row][positionOfClickedSquare.col]
         .isBarrier;
     }
 
