@@ -35,12 +35,13 @@ class Square extends React.Component {
 
     const searchAreaClass = this.getSearchAreaStylingClass(isInSearchArea, hasMainStylingClass);
 
-    const isOnShortestPathClass = this.getOnShortestPathStylingClass(isOnShortestPath, hasMainStylingClass);
+    const shortestPathClass = this.getOnShortestPathStylingClass(isOnShortestPath, hasMainStylingClass);
 
     return (
       <button
-        className={`square ${mainStylingClass} ${searchAreaClass} ${isOnShortestPathClass}`}
+        className={`square ${mainStylingClass} ${searchAreaClass} ${shortestPathClass}`}
         onClick={() => this.props.handleClickOnSquare(this.props.id)}
+        data-testid="square"
       ></button>
     );
   }

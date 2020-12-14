@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom";
 import { render } from "@testing-library/react";
-import Square from "./Square";
+import Square from "../Square";
 
 describe("Square is rendered", () => {
   test("renders with default square class", () => {
