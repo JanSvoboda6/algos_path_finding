@@ -1,6 +1,9 @@
 import React from "react";
 import "./PathFinder.css";
 import Table from "./Table";
+import { dijkstra } from "./Dijkstra";
+import { aStar } from "./AStar";
+import { constructShortestPath } from "./Util";
 
 const COLS = 19;
 const ROWS = 19;
@@ -38,20 +41,20 @@ class PathFinder extends React.Component {
       }
       squares.push(squaresInRow);
     }
-    this.setState({ squares }, this.chooseSquares);
+    this.setState({ squares }, this.createStartingTemplate);
   }
 
-  chooseSquares() {
-    const START_ROW = 8;
+  createStartingTemplate() {
+    const START_ROW = 9;
     const START_COL = 5;
 
-    const FINISH_ROW = 8;
+    const FINISH_ROW = 9;
     const FINISH_COL = 13;
 
     const BARRIERS_POSITION = [
-      [7, 9],
       [8, 9],
       [9, 9],
+      [10, 9],
     ];
 
     const squares = this.state.squares;
@@ -91,159 +94,6 @@ class PathFinder extends React.Component {
     this.setState({ squares });
   }
 
-  solve = (squares) => {
-    let visitedSquares = [];
-    this.setInfiniteDistanceFromStart(squares);
-    let start = this.getStartingSquare(squares);
-    let priorityQueue = [];
-    priorityQueue.push(start);
-    let isFinished = false;
-    while (priorityQueue.length && !isFinished) {
-      priorityQueue.sort((a, b) => {
-        if (a.distance <= b.distance) {
-          return -1;
-        }
-        return 1;
-      });
-      let currentSquare = priorityQueue[0];
-      //TODO: Remove?
-      priorityQueue.shift();
-      let neighbours = this.getNeighboursOf(currentSquare, squares);
-      for (let i = 0; i < neighbours.length; i++) {
-        let neighbour = neighbours[i];
-        let computedDistanceOfNeighbour = currentSquare.distance + 1;
-
-        if (computedDistanceOfNeighbour < neighbour.distance) {
-          neighbour.distance = computedDistanceOfNeighbour;
-          neighbour.previousSquare = currentSquare;
-        }
-
-        if (neighbour.isFinish) {
-          isFinished = true;
-          break;
-        }
-
-        if (!neighbour.hasBeenVisited) {
-          priorityQueue.push(neighbour);
-          neighbour.hasBeenVisited = true;
-          visitedSquares.push(neighbour);
-        }
-        squares[neighbour.position.row][neighbour.position.col] = neighbour;
-      }
-    }
-    //this.animateSolving(squaresForAnimation);
-    //TODO Not run when path can not be made
-    //this.animateShortestPath(this.getFinishSquare(squares), squares);
-    //this.setState({ wasSolved: true });
-    return visitedSquares;
-  };
-
-  solveWithHeuristics = (squares) => {
-    const POWER_OF_HEURISTICS = 4;
-    let visitedSquares = [];
-    this.setInfiniteDistanceFromStart(squares);
-    let start = this.getStartingSquare(squares);
-    let priorityQueue = [];
-    priorityQueue.push(start);
-    let isFinished = false;
-    while (priorityQueue.length && !isFinished) {
-      priorityQueue.sort((a, b) => {
-        if (a.distance <= b.distance) {
-          return -1;
-        }
-        return 1;
-      });
-      let currentSquare = priorityQueue[0];
-      //TODO: Remove exists?
-      priorityQueue.shift();
-      let neighbours = this.getNeighboursOf(currentSquare, squares);
-      for (let i = 0; i < neighbours.length; i++) {
-        let neighbour = neighbours[i];
-        let computedDistanceOfNeighbour = currentSquare.distance + 1;
-        let heuristics = this.getDistanceHeuristics(
-          neighbour,
-          squares,
-          POWER_OF_HEURISTICS
-        );
-        if (computedDistanceOfNeighbour + heuristics < neighbour.distance) {
-          neighbour.distance = computedDistanceOfNeighbour + heuristics;
-          neighbour.previousSquare = currentSquare;
-        }
-
-        if (neighbour.isFinish) {
-          isFinished = true;
-          break;
-        }
-
-        if (!neighbour.hasBeenVisited) {
-          priorityQueue.push(neighbour);
-          neighbour.hasBeenVisited = true;
-          visitedSquares.push(neighbour);
-        }
-        squares[neighbour.position.row][neighbour.position.col] = neighbour;
-      }
-    }
-    return visitedSquares;
-  };
-
-  getDistanceHeuristics = (square, squares, power) => {
-    let finishSquare = this.getFinishSquare(squares);
-    const squareRow = square.position.row;
-    const squareCol = square.position.col;
-    const finishRow = finishSquare.position.row;
-    const finishCol = finishSquare.position.col;
-    return Math.pow(
-      Math.abs(finishRow - squareRow) + Math.abs(finishCol - squareCol),
-      power
-    );
-  };
-
-  getNeighboursOf = (square, squares) => {
-    let squarePosition = square.position;
-    let neighbours = [];
-
-    //TODO: Refactor
-    if (squarePosition.row + 1 !== ROWS) {
-      if (!squares[squarePosition.row + 1][squarePosition.col].isBarrier) {
-        neighbours.push(squares[squarePosition.row + 1][squarePosition.col]);
-      }
-    }
-
-    if (squarePosition.row - 1 >= 0) {
-      if (!squares[squarePosition.row - 1][squarePosition.col].isBarrier) {
-        neighbours.push(squares[squarePosition.row - 1][squarePosition.col]);
-      }
-    }
-
-    if (squarePosition.col + 1 !== COLS) {
-      if (!squares[squarePosition.row][squarePosition.col + 1].isBarrier) {
-        neighbours.push(squares[squarePosition.row][squarePosition.col + 1]);
-      }
-    }
-
-    if (squarePosition.col - 1 >= 0) {
-      if (!squares[squarePosition.row][squarePosition.col - 1].isBarrier) {
-        neighbours.push(squares[squarePosition.row][squarePosition.col - 1]);
-      }
-    }
-
-    return neighbours;
-  };
-
-  setInfiniteDistanceFromStart = (squares) => {
-    for (let i = 0; i < COLS; i++) {
-      for (let j = 0; j < ROWS; j++) {
-        if (squares[i][j].isStart) {
-          squares[i][j]["distance"] = 0;
-        } else {
-          squares[i][j]["distance"] = Number.MAX_VALUE;
-        }
-        squares[i][j]["previousSquare"] = null;
-        squares[i][j]["hasBeenVisited"] = false;
-      }
-    }
-  };
-
   getStartingSquare = (squares) => {
     //TODO: Refactor
     let startingSquare = {};
@@ -270,20 +120,6 @@ class PathFinder extends React.Component {
     return finishSquare;
   };
 
-  constructShortestPath = (startingSquare, finishSquare) => {
-    let shortestPath = [];
-    let tempSquare = finishSquare;
-    if (!finishSquare.previousSquare) {
-      return;
-    }
-    while (tempSquare !== startingSquare) {
-      shortestPath.push(tempSquare);
-      tempSquare = tempSquare.previousSquare;
-    }
-    shortestPath.reverse();
-    return shortestPath;
-  };
-
   handleSolveClick = () => {
     this.eraseSearchAreaWithShortestPath();
     let squares = this.state.squares;
@@ -292,18 +128,16 @@ class PathFinder extends React.Component {
     let visitedSquares = [];
 
     if (this.state.algorithmType === "dijkstra") {
-      visitedSquares = this.solve(squares);
-    } else if (this.state.algorithmType == "a_star") {
-      visitedSquares = this.solveWithHeuristics(squares);
+      visitedSquares = dijkstra(squares, startingSquare, finishSquare);
+    } else if (this.state.algorithmType === "a_star") {
+      visitedSquares = aStar(squares, startingSquare, finishSquare);
     } else {
-      alert("NO algorithm has been chosen!");
+      alert("No algorithm has been chosen!");
       return;
     }
+
     this.animateSolving(squares, visitedSquares).then(() => {
-      const shortestPath = this.constructShortestPath(
-        startingSquare,
-        finishSquare
-      );
+      const shortestPath = constructShortestPath(startingSquare, finishSquare);
 
       if (shortestPath) {
         this.animateShortestPath(squares, shortestPath);
@@ -317,15 +151,10 @@ class PathFinder extends React.Component {
       for (let i = 0; i < visitedSquares.length; i++) {
         let currentSquare = visitedSquares[i];
         setTimeout(() => {
-          squares[currentSquare.position.row][
-            currentSquare.position.col
-          ].isInSearchArea = true;
+          squares[currentSquare.position.row][currentSquare.position.col].isInSearchArea = true;
           this.setState({ squares: squares });
         }, DELAY_BETWEEN_SQUARE_ANIMATION * (i + 1));
-        setTimeout(
-          resolve,
-          DELAY_BETWEEN_SQUARE_ANIMATION * visitedSquares.length
-        );
+        setTimeout(resolve, DELAY_BETWEEN_SQUARE_ANIMATION * visitedSquares.length);
       }
     });
   };
@@ -336,9 +165,7 @@ class PathFinder extends React.Component {
       setTimeout(() => {
         let currentSquare = shortestPath[i];
         //TODO: Timeout not working properly? Maybe problem with this.state.squares?
-        squares[currentSquare.position.row][
-          currentSquare.position.col
-        ].isOnShortestPath = true;
+        squares[currentSquare.position.row][currentSquare.position.col].isOnShortestPath = true;
         this.setState({ squares });
       }, DELAY_BETWEEN_SQUARE_ON_PATH_ANIMATION * (i + 1));
     }
@@ -367,14 +194,10 @@ class PathFinder extends React.Component {
       positionOfClickedSquare !== oldFinishSquare.position
     ) {
       if (this.state.selectedSquareType === "start") {
-        squares[oldStartingSquare.position.row][
-          oldStartingSquare.position.col
-        ].isStart = false;
+        squares[oldStartingSquare.position.row][oldStartingSquare.position.col].isStart = false;
       }
       if (this.state.selectedSquareType === "finish") {
-        squares[oldFinishSquare.position.row][
-          oldFinishSquare.position.col
-        ].isFinish = false;
+        squares[oldFinishSquare.position.row][oldFinishSquare.position.col].isFinish = false;
       }
 
       squares[positionOfClickedSquare.row][positionOfClickedSquare.col] = {
@@ -386,10 +209,9 @@ class PathFinder extends React.Component {
     }
 
     if (this.state.selectedSquareType === "barrier") {
-      squares[positionOfClickedSquare.row][
-        positionOfClickedSquare.col
-      ].isBarrier = !squares[positionOfClickedSquare.row][positionOfClickedSquare.col]
-        .isBarrier;
+      squares[positionOfClickedSquare.row][positionOfClickedSquare.col].isBarrier = !squares[
+        positionOfClickedSquare.row
+      ][positionOfClickedSquare.col].isBarrier;
     }
 
     this.setState({ squares: squares });
@@ -406,13 +228,7 @@ class PathFinder extends React.Component {
   };
 
   render() {
-    const {
-      squares,
-      selectedSquareType,
-      wasSolved,
-      squaresForAnimation,
-      shortestPath,
-    } = this.state;
+    const { squares, selectedSquareType, wasSolved, squaresForAnimation, shortestPath } = this.state;
     return (
       <div className="App">
         <div className="navbar">
@@ -450,9 +266,7 @@ class PathFinder extends React.Component {
             wasSolved={wasSolved}
             squaresForAnimation={squaresForAnimation}
             shortestPath={shortestPath}
-            setInSearchAreaPropertyOfSquare={
-              this.setInSearchAreaPropertyOfSquare
-            }
+            setInSearchAreaPropertyOfSquare={this.setInSearchAreaPropertyOfSquare}
             handleClickOnSquare={this.handleClickOnSquare}
           />
         </div>
