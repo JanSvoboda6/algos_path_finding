@@ -1,5 +1,5 @@
 import React from "react";
-import "./PathFinder.css";
+import "./styles/PathFinder.css";
 import Table from "./Table";
 import { dijkstra } from "./algos/Dijkstra";
 import { aStar } from "./algos/AStar";

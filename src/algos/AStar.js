@@ -1,29 +1,34 @@
 import{setInfiniteDistanceFromStart, getNeighboursOf} from "./AlgosUtil";
 
+const POWER_OF_HEURISTICS = 4;
+
 export function aStar(squares, startingSquare, finishSquare) {
-  const POWER_OF_HEURISTICS = 4;
-  let visitedSquares = [];
   setInfiniteDistanceFromStart(squares);
+  let visitedSquares = [];
   let priorityQueue = [];
-  priorityQueue.push(startingSquare);
   let isFinished = false;
+  priorityQueue.push(startingSquare);
+
   while (priorityQueue.length && !isFinished) {
+
     priorityQueue.sort((a, b) => {
       if (a.distance <= b.distance) {
         return -1;
       }
       return 1;
     });
+
     let currentSquare = priorityQueue[0];
-    //TODO: Remove exists?
     priorityQueue.shift();
     let neighbours = getNeighboursOf(currentSquare, squares);
+
     for (let i = 0; i < neighbours.length; i++) {
       let neighbour = neighbours[i];
-      let computedDistanceOfNeighbour = currentSquare.distance + 1;
+      let distanceOfNeighbourInheritedFromCurrentSquare = currentSquare.distance + 1;
       let heuristics = getDistanceHeuristics(neighbour, finishSquare, POWER_OF_HEURISTICS);
-      if (computedDistanceOfNeighbour + heuristics < neighbour.distance) {
-        neighbour.distance = computedDistanceOfNeighbour + heuristics;
+
+      if (distanceOfNeighbourInheritedFromCurrentSquare + heuristics < neighbour.distance) {
+        neighbour.distance = distanceOfNeighbourInheritedFromCurrentSquare + heuristics;
         neighbour.previousSquare = currentSquare;
       }
 
@@ -33,17 +38,17 @@ export function aStar(squares, startingSquare, finishSquare) {
       }
 
       if (!neighbour.hasBeenVisited) {
-        priorityQueue.push(neighbour);
         neighbour.hasBeenVisited = true;
+        priorityQueue.push(neighbour);
         visitedSquares.push(neighbour);
       }
-      squares[neighbour.position.row][neighbour.position.col] = neighbour;
+
     }
   }
   return visitedSquares;
 }
 
-function getDistanceHeuristics (square, finishSquare, power){
+export function getDistanceHeuristics (square, finishSquare, power){
   const squareRow = square.position.row;
   const squareCol = square.position.col;
   const finishRow = finishSquare.position.row;

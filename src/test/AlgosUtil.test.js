@@ -28,7 +28,8 @@ describe("When constructShortestPath is called then path from start to finish is
 
     let path = constructShortestPath(startingSquare, finishSquare);
 
-    expect(path.length).toBe(3);
+    const NUM_OF_SQUARES_ON_PATH = 3;
+    expect(path.length).toBe(NUM_OF_SQUARES_ON_PATH);
 
     expect(path[0]).toBe(startingSquare);
     expect(path[1]).toBe(intermediateSquare);

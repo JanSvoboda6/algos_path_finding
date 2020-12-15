@@ -1,6 +1,5 @@
 import React from "react";
 import Square from "./Square";
-
 class Table extends React.Component {
   constructor(props) {
     super(props);
@@ -9,7 +8,7 @@ class Table extends React.Component {
   render() {
     const { squares } = this.props;
     return (
-      <div className="table">
+      <div>
         {squares.map((row, rowIndex) => {
           return (
             <div key={rowIndex}>
