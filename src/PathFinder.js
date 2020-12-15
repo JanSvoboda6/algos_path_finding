@@ -5,8 +5,8 @@ import { dijkstra } from "./algos/Dijkstra";
 import { aStar } from "./algos/AStar";
 import { constructShortestPath } from "./algos/AlgosUtil";
 
-const COLS = 19;
 const ROWS = 19;
+const COLS = 19;
 
 class PathFinder extends React.Component {
   constructor(props) {
@@ -27,9 +27,9 @@ class PathFinder extends React.Component {
 
   createSquares() {
     let squares = [];
-    for (let i = 0; i < COLS; i++) {
+    for (let i = 0; i < ROWS; i++) {
       let squaresInRow = [];
-      for (let j = 0; j < ROWS; j++) {
+      for (let j = 0; j < COLS; j++) {
         const square = {
           position: { row: i, col: j },
           isStart: false,
@@ -177,6 +177,8 @@ class PathFinder extends React.Component {
         squares[i][j].hasBeenVisited = false;
         squares[i][j].isInSearchArea = false;
         squares[i][j].isOnShortestPath = false;
+        squares[i][j].previousSquare = null;
+        squares[i][j].hasBeenVisited = false;
       }
     }
     this.setState({ squares: squares });

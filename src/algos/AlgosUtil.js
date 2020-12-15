@@ -43,6 +43,7 @@ export function getNeighboursOf(square, squares) {
       shortestPath.push(tempSquare);
       tempSquare = tempSquare.previousSquare;
     }
+    shortestPath.push(startingSquare);
     shortestPath.reverse();
     return shortestPath;
   }
@@ -50,15 +51,13 @@ export function getNeighboursOf(square, squares) {
   export function setInfiniteDistanceFromStart(squares){
     const ROWS = squares.length;
     const COLS = squares[0].length;
-    for (let i = 0; i < COLS; i++) {
-      for (let j = 0; j < ROWS; j++) {
+    for (let i = 0; i < ROWS; i++) {
+      for (let j = 0; j < COLS; j++) {
         if (squares[i][j].isStart) {
           squares[i][j]["distance"] = 0;
         } else {
           squares[i][j]["distance"] = Number.MAX_VALUE;
         }
-        squares[i][j]["previousSquare"] = null;
-        squares[i][j]["hasBeenVisited"] = false;
       }
     }
   };
