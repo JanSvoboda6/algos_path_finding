@@ -35,7 +35,6 @@ class PathFinder extends React.Component {
           isStart: false,
           isFinish: false,
           isBarrier: false,
-          //isInSearchArea: false,
         };
         squaresInRow.push(square);
       }
@@ -45,48 +44,34 @@ class PathFinder extends React.Component {
   }
 
   createStartingTemplate() {
+    const squares = this.state.squares;
     const START_ROW = 9;
     const START_COL = 5;
-
     const FINISH_ROW = 9;
     const FINISH_COL = 13;
-
     const BARRIERS_POSITION = [
       [8, 9],
       [9, 9],
       [10, 9],
     ];
 
-    const squares = this.state.squares;
-
     squares[START_ROW][START_COL] = {
+      ...squares[START_ROW][START_COL],
       position: { row: START_ROW, col: START_COL },
       isStart: true,
-      isFinish: false,
-      isBarrier: false,
     };
 
     squares[FINISH_ROW][FINISH_COL] = {
+      ...squares[FINISH_ROW][FINISH_COL],
       position: { row: FINISH_ROW, col: FINISH_COL },
-      isStart: false,
       isFinish: true,
-      isBarrier: false,
-    };
-
-    squares[FINISH_ROW][FINISH_COL] = {
-      position: { row: FINISH_ROW, col: FINISH_COL },
-      isStart: false,
-      isFinish: true,
-      isBarrier: false,
     };
 
     for (let i = 0; i < BARRIERS_POSITION.length; i++) {
       let row = BARRIERS_POSITION[i][0];
       let col = BARRIERS_POSITION[i][1];
       squares[row][col] = {
-        position: { row: BARRIERS_POSITION[i][0], col: BARRIERS_POSITION[i][1] },
-        isStart: false,
-        isFinish: false,
+        ...squares[BARRIERS_POSITION[i][0]][BARRIERS_POSITION[i][1]],
         isBarrier: true,
       };
     }
@@ -95,53 +80,29 @@ class PathFinder extends React.Component {
   }
 
   getStartingSquare = (squares) => {
-    //TODO: Refactor
     let startingSquare = {};
-    squares.filter((squaresInRow) => {
-      let squareRow = squaresInRow.filter((square) => {
-        if (square.isStart === true) {
-          startingSquare = square;
+    outerloop: for (let i = 0; i < ROWS; i++) {
+      for (let j = 0; j < COLS; j++) {
+        if (squares[i][j].isStart) {
+          startingSquare = squares[i][j];
+          break outerloop;
         }
-      });
-    });
+      }
+    }
     return startingSquare;
   };
 
   getFinishSquare = (squares) => {
-    //TODO: Refactor
     let finishSquare = {};
-    squares.filter((squaresInRow) => {
-      let squareRow = squaresInRow.filter((square) => {
-        if (square.isFinish === true) {
-          finishSquare = square;
+    outerloop: for (let i = 0; i < ROWS; i++) {
+      for (let j = 0; j < COLS; j++) {
+        if (squares[i][j].isFinish) {
+          finishSquare = squares[i][j];
+          break outerloop;
         }
-      });
-    });
-    return finishSquare;
-  };
-
-  handleSolveClick = () => {
-    this.eraseSearchAreaWithShortestPath();
-    let squares = this.state.squares;
-    let visitedSquares = [];
-    const startingSquare = this.getStartingSquare(squares);
-    const finishSquare = this.getFinishSquare(squares);
-
-    if (this.state.algorithmType === "dijkstra") {
-      visitedSquares = dijkstra(squares, startingSquare, finishSquare);
-    } else if (this.state.algorithmType === "a_star") {
-      visitedSquares = aStar(squares, startingSquare, finishSquare);
-    } else {
-      alert("No algorithm has been chosen!");
-      return;
-    }
-
-    this.animateSolving(squares, visitedSquares).then(() => {
-      const shortestPath = constructShortestPath(startingSquare, finishSquare);
-      if (shortestPath) {
-        this.animateShortestPath(squares, shortestPath);
       }
-    });
+    }
+    return finishSquare;
   };
 
   animateSolving = async (squares, visitedSquares) => {
@@ -163,7 +124,6 @@ class PathFinder extends React.Component {
     for (let i = 0; i < shortestPath.length - 1; i++) {
       setTimeout(() => {
         let currentSquare = shortestPath[i];
-        //TODO: Timeout not working properly? Maybe problem with this.state.squares?
         squares[currentSquare.position.row][currentSquare.position.col].isOnShortestPath = true;
         this.setState({ squares });
       }, DELAY_BETWEEN_SQUARE_ON_PATH_ANIMATION * (i + 1));
@@ -178,45 +138,73 @@ class PathFinder extends React.Component {
         squares[i][j].isInSearchArea = false;
         squares[i][j].isOnShortestPath = false;
         squares[i][j].previousSquare = null;
-        squares[i][j].hasBeenVisited = false;
       }
     }
     this.setState({ squares: squares });
   };
 
-  handleClickOnSquare = (positionOfClickedSquare) => {
+  handleSolveClick = () => {
+    this.eraseSearchAreaWithShortestPath();
     let squares = this.state.squares;
-    //TODO: ADD start node and finish node from start
-    const oldStartingSquare = this.getStartingSquare(squares);
-    const oldFinishSquare = this.getFinishSquare(squares);
-    //TODO: Proper refactoring needed
-    if (
-      positionOfClickedSquare !== oldStartingSquare.position &&
-      positionOfClickedSquare !== oldFinishSquare.position
-    ) {
-      if (this.state.selectedSquareType === "start") {
-        squares[oldStartingSquare.position.row][oldStartingSquare.position.col].isStart = false;
-      }
-      if (this.state.selectedSquareType === "finish") {
-        squares[oldFinishSquare.position.row][oldFinishSquare.position.col].isFinish = false;
-      }
+    let visitedSquares = [];
+    const startingSquare = this.getStartingSquare(squares);
+    const finishSquare = this.getFinishSquare(squares);
 
-      squares[positionOfClickedSquare.row][positionOfClickedSquare.col] = {
-        ...squares[positionOfClickedSquare.row][positionOfClickedSquare.col],
-        position: { row: positionOfClickedSquare.row, col: positionOfClickedSquare.col },
-        isStart: this.state.selectedSquareType === "start" ? true : false,
-        isFinish: this.state.selectedSquareType === "finish" ? true : false,
-      };
+    switch (this.state.algorithmType) {
+      case "dijkstra":
+        visitedSquares = dijkstra(squares, startingSquare, finishSquare);
+        break;
+      case "a_star":
+        visitedSquares = aStar(squares, startingSquare, finishSquare);
+        break;
+      default:
+        alert("No algorithm has been chosen!");
+        return;
     }
 
-    if (this.state.selectedSquareType === "barrier") {
-      squares[positionOfClickedSquare.row][positionOfClickedSquare.col].isBarrier = !squares[
-        positionOfClickedSquare.row
-      ][positionOfClickedSquare.col].isBarrier;
+    this.animateSolving(squares, visitedSquares).then(() => {
+      const shortestPath = constructShortestPath(startingSquare, finishSquare);
+      if (shortestPath) {
+        this.animateShortestPath(squares, shortestPath);
+      }
+    });
+  };
+
+  handleClickOnSquare = (clickedSquarePosition) => {
+    this.eraseSearchAreaWithShortestPath();
+    let squares = this.state.squares;
+    const oldStartingSquare = this.getStartingSquare(squares);
+    const oldFinishSquare = this.getFinishSquare(squares);
+
+    const isClickedSquareStartingSquare = clickedSquarePosition === oldStartingSquare.position;
+    const isClickedSquareFinishSquare = clickedSquarePosition === oldFinishSquare.position;
+
+    if (isClickedSquareStartingSquare || isClickedSquareFinishSquare) {
+      return;
+    }
+
+    let updatedSquare = squares[clickedSquarePosition.row][clickedSquarePosition.col];
+
+    switch (this.state.selectedSquareType) {
+      case "start":
+        squares[oldStartingSquare.position.row][oldStartingSquare.position.col].isStart = false;
+        updatedSquare.isStart = true;
+        updatedSquare.isBarrier = false;
+        break;
+      case "finish":
+        squares[oldFinishSquare.position.row][oldFinishSquare.position.col].isFinish = false;
+        updatedSquare.isFinish = true;
+        updatedSquare.isBarrier = false;
+        break;
+      case "barrier":
+        let isSquareBarrier = squares[clickedSquarePosition.row][clickedSquarePosition.col].isBarrier;
+        updatedSquare.isBarrier = !isSquareBarrier;
+        break;
+      default:
+        return;
     }
 
     this.setState({ squares: squares });
-    this.eraseSearchAreaWithShortestPath();
   };
 
   handleSquareTypeChoice = (event) => {
@@ -231,7 +219,7 @@ class PathFinder extends React.Component {
   render() {
     const { squares, selectedSquareType, wasSolved, squaresForAnimation, shortestPath } = this.state;
     return (
-      <div className="App">
+      <div className="path-finder">
         <div className="navbar">
           <ul>
             <li>Algo Visualizer</li>

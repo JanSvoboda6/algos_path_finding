@@ -2,10 +2,7 @@ import React from "react";
 import "./styles/Square.css";
 
 class Square extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
+  
   getMainStylingClass(isStart, isFinish, isBarrier) {
     return isStart ? "start" : isFinish ? "finish" : isBarrier ? "barrier" : "";
   }
